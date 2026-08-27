@@ -6,9 +6,7 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/omni_malta_64.mk
+    $(LOCAL_DIR)/twrp_malta_64.mk
 
 COMMON_LUNCH_CHOICES := \
-    omni_malta_64-user \
-    omni_malta_64-userdebug \
-    omni_malta_64-eng
+    twrp_malta_64-eng
