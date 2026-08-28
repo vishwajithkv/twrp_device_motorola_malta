@@ -38,6 +38,11 @@ subsystem sound
 /dev/hwbinder             0666   root       root
 /dev/vndbinder            0666   root       root
 
+# MediaTek flashlight-core device used by Malta (AW3643).
+/dev/flashlight           0660   root       system
+/sys/kernel/torch_status   0660   root       system
+/sys/kernel/torch_level_support 0444 root system
+
 /dev/pmsg0                0222   root       log
 
 # kms driver for drm based gpu

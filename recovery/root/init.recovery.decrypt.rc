@@ -1,0 +1,78 @@
+# Malta Android 10 uses the Microtrust TEE and Beanpod Keymaster 4.0 for FBE.
+# Keep these services disabled until recovery has started the binder managers;
+# starting them too early causes the keymaster HAL to abort.  The stock
+# Microtrust script supplies the TEE daemon arguments and device setup.
+
+import /vendor/etc/init/microtrust.rc
+import /vendor/etc/init/android.hardware.light@2.0-service-mediatek.rc
+
+on init
+    export LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw
+    export PATH /sbin:/system/bin:/vendor/bin:/vendor/bin/hw
+    start hwservicemanager
+    start servicemanager
+
+service hwservicemanager /system/bin/hwservicemanager
+    class core
+    user root
+    group root readproc
+    disabled
+    seclabel u:r:recovery:s0
+
+service servicemanager /system/bin/servicemanager
+    class core
+    user root
+    group root readproc
+    disabled
+    seclabel u:r:recovery:s0
+
+service keymaster-4-0 /system/bin/android.hardware.keymaster@4.0-service.beanpod
+    class early_hal
+    user system
+    group system drmrpc
+    setenv LD_LIBRARY_PATH /vendor/lib64:/system/lib64:/sbin
+    interface android.hardware.keymaster@4.0::IKeymasterDevice default
+    seclabel u:r:recovery:s0
+
+service gatekeeper-1-0 /vendor/bin/hw/android.hardware.gatekeeper@1.0-service
+    class hal
+    user system
+    group system
+    setenv LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw:/system/lib64
+    interface android.hardware.gatekeeper@1.0::IGatekeeper default
+    seclabel u:r:recovery:s0
+
+on fs
+    install_keyring
+    setprop crypto.ready 1
+    # Microtrust's keymaster requires this node before Beanpod starts.
+    chown system drmrpc /dev/ut_keymaster
+    chmod 0660 /dev/ut_keymaster
+    start teei_daemon
+    # Android 10 FBE key blobs use the legacy keystore daemon.  Its service
+    # is started after hwservicemanager is ready below to avoid a binder race.
+    mkdir /tmp/misc 0771 root root
+    mkdir /tmp/misc/keystore 0700 root root
+
+on property:hwservicemanager.ready=true
+    start keymaster-4-0
+    start gatekeeper-1-0
+    start keystore
+
+on property:ro.crypto.state=encrypted
+    start teei_daemon
+    start keymaster-4-0
+    start gatekeeper-1-0
+
+on property:twrp.decrypt.done=true
+    stop teei_daemon
+    stop keymaster-4-0
+    stop gatekeeper-1-0
+    stop keystore
+
+service keystore /system/bin/keystore /tmp/misc/keystore
+    class core
+    user root
+    group root drmrpc readproc log
+    disabled
+    seclabel u:r:recovery:s0
