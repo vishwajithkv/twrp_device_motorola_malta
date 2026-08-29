@@ -98,7 +98,7 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 TW_INCLUDE_FASTBOOTD := true
 TW_USE_DYNAMIC_PARTITIONS := true
-TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery.fstab
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
 
 # OrangeFox 9.0
 # Malta is an A/B device with recovery in the boot partition.
