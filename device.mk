@@ -7,11 +7,6 @@
 
 LOCAL_PATH := device/motorola/malta_64
 
-# The ramdisk vendor directory is hidden from the system linker namespace.
-# Microtrust's recovery daemon loads this stock library from /system/lib64.
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/recovery/root/vendor/lib64/libimsg_log.so:$(TARGET_COPY_OUT_RECOVERY)/root/system/lib64/libimsg_log.so
-
 # The recovery kernel does not expose the normal Android battery service.
 OF_USE_LEGACY_BATTERY_SERVICES := 1
 # MTK power-supply reports capacity asynchronously during recovery startup.
