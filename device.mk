@@ -7,18 +7,10 @@
 
 LOCAL_PATH := device/motorola/malta_64
 
-# Recovery crypto and dynamic-partition support
-TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_CRYPTO_FBE := true
-TW_INCLUDE_FBE_METADATA_DECRYPT := true
-
-# Malta uses Android 10 FBE with the Microtrust/Beanpod Keymaster 4.0
-# implementation. These OrangeFox fallbacks are required on MTK devices
-# when the ROM fstab cannot be processed from recovery.
-OF_FBE_METADATA_MOUNT_IGNORE := 1
-OF_FORCE_USE_RECOVERY_FSTAB := 1
-OF_DEFAULT_KEYMASTER_VERSION := 4.0
-OF_FIX_DECRYPTION_ON_DATA_MEDIA := 1
+# The ramdisk vendor directory is hidden from the system linker namespace.
+# Microtrust's recovery daemon loads this stock library from /system/lib64.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/recovery/root/vendor/lib64/libimsg_log.so:$(TARGET_COPY_OUT_RECOVERY)/root/system/lib64/libimsg_log.so
 
 # The recovery kernel does not expose the normal Android battery service.
 OF_USE_LEGACY_BATTERY_SERVICES := 1

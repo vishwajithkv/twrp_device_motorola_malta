@@ -36,6 +36,9 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a53
 
+TARGET_USES_64_BIT_BINDER := true
+TARGET_SUPPORTS_64_BIT_APPS := true
+
 # APEX
 DEXPREOPT_GENERATE_APEX_IMAGE := true
 
@@ -99,6 +102,20 @@ TARGET_USERIMAGES_USE_F2FS := true
 TW_INCLUDE_FASTBOOTD := true
 TW_USE_DYNAMIC_PARTITIONS := true
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
+
+# Crypto
+# These are build-time recovery flags and must remain in BoardConfig.mk.
+TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_CRYPTO_FBE := true
+TW_INCLUDE_FBE_METADATA_DECRYPT := true
+OF_FBE_METADATA_MOUNT_IGNORE := 1
+OF_FORCE_USE_RECOVERY_FSTAB := 1
+OF_DEFAULT_KEYMASTER_VERSION := 4.0
+OF_FIX_DECRYPTION_ON_DATA_MEDIA := 1
+
+# Keep useful crypto/TEE failures in the recovery log buffers.
+TWRP_INCLUDE_LOGCAT := true
+TARGET_USES_LOGD := true
 
 # OrangeFox 9.0
 # Malta is an A/B device with recovery in the boot partition.
