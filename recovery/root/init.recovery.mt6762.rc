@@ -1,13 +1,16 @@
 import /init.recovery.decrypt.rc
 
 on init
-    setprop sys.usb.configfs 1
+    # Keep the stock MTK android_usb gadget path; no configfs controller is
+    # exported by this kernel.
+    setprop sys.usb.configfs 0
     setprop sys.usb.ffs.aio_compat 1
 
-on fs && property:ro.debuggable=0
+on fs
     # distinguish USB shoulde connect or not, i.e. CDP vs SDP
     write /sys/class/udc/musb-hdrc/device/cmode 2
-    # set charging free due to it wait for USB activation
+    setprop sys.usb.config none
+    setprop sys.usb.config adb
     start adbd
 
 on post-fs
