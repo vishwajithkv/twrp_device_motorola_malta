@@ -32,6 +32,11 @@ service gatekeeper-1-0 /system/bin/android.hardware.gatekeeper@1.0-service
 on fs
     install_keyring
     setprop crypto.ready 1
+    # The active Android 16 GSI created the FBE keymaster blob with this OS
+    # identity. Beanpod rejects it with KEY_REQUIRES_UPGRADE when recovery
+    # advertises Android 10/2099, and its legacy upgrade command is unsupported.
+    exec u:r:recovery:s0 root root -- /sbin/resetprop ro.build.version.release 16
+    exec u:r:recovery:s0 root root -- /sbin/resetprop ro.build.version.security_patch 2026-02-01
     # Microtrust's keymaster requires this node before Beanpod starts.
     chown system drmrpc /dev/ut_keymaster
     chmod 0660 /dev/ut_keymaster
