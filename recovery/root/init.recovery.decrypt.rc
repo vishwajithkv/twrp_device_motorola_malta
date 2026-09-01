@@ -1,7 +1,7 @@
 # Malta Android 10 uses the Microtrust TEE and Beanpod Keymaster 4.0 for FBE.
-# Keep these services disabled until recovery has started the binder managers;
-# starting them too early causes the keymaster HAL to abort.  The stock
-# Microtrust script supplies the TEE daemon arguments and device setup.
+# Start these services only after the recovery fs trigger has prepared the
+# fscrypt keyring and Microtrust device node. The stock Microtrust script
+# supplies the TEE daemon arguments and device setup.
 
 import /init.recovery.microtrust.rc
 import /vendor/etc/init/android.hardware.light@2.0-service-mediatek.rc
@@ -41,14 +41,17 @@ on fs
     chown system drmrpc /dev/ut_keymaster
     chmod 0660 /dev/ut_keymaster
     start teei_daemon
-    # Android 10 FBE key blobs use the legacy keystore daemon.  Its service
-    # is started after hwservicemanager is ready below to avoid a binder race.
-    mkdir /tmp/misc 0771 root root
-    mkdir /tmp/misc/keystore 0700 root root
-
-on property:hwservicemanager.ready=true
+    # teei_daemon initializes secure-world asynchronously. Beanpod blocks or
+    # fails to register if it is launched before TEEI_BOOT_OK.
+    exec u:r:recovery:s0 root root -- /system/bin/sleep 2
     start keymaster-4-0
     start gatekeeper-1-0
+    mkdir /tmp/misc 0771 root root
+    mkdir /tmp/misc/keystore 0700 root root
+    # Keystore2 may have started before the legacy HIDL HAL was registered.
+    # Restart it after Beanpod is ready so recovery can unwrap FBE keys.
+    exec u:r:recovery:s0 root root -- /system/bin/sleep 1
+    restart keystore2
 
 on property:twrp.decrypt.done=true
     stop teei_daemon
