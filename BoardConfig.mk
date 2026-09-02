@@ -117,6 +117,12 @@ OF_FIX_DECRYPTION_ON_DATA_MEDIA := 1
 TWRP_INCLUDE_LOGCAT := true
 TARGET_USES_LOGD := true
 
+# FBE links recovery against libsysutils even when the size-constrained Fox
+# 14.1 workflow disables logd. OrangeFox normally copies this library only
+# through its logd payload, so relink it explicitly into the recovery ramdisk.
+TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libsysutils.so
+
 # OrangeFox 9.0
 # Malta is an A/B device with recovery in the boot partition.
 OF_AB_DEVICE_WITH_RECOVERY_PARTITION := 0
