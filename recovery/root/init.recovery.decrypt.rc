@@ -9,8 +9,12 @@ import /vendor/etc/init/android.hardware.light@2.0-service-mediatek.rc
 on init
     mkdir /mnt/vendor/persist 0700 root root
     mount ext4 /dev/block/platform/bootdevice/by-name/persist /mnt/vendor/persist
-    export LD_LIBRARY_PATH /vendor/lib64:/vendor/lib64/hw:/system/lib64
-    export PATH /sbin:/system/bin:/vendor/bin:/vendor/bin/hw
+
+    # Do not export a vendor-first linker path globally. Keystore2 is built
+    # against the recovery's libkeymint/libkeymaster ABI and exits before
+    # registering when it accidentally loads Malta's Android 10 vendor copy.
+    # The legacy HALs that require vendor libraries receive a private path in
+    # their service definitions below.
 
 service keymaster-4-0 /system/bin/android.hardware.keymaster@4.0-service.beanpod
     user root
@@ -22,8 +26,8 @@ service keymaster-4-0 /system/bin/android.hardware.keymaster@4.0-service.beanpod
     seclabel u:r:recovery:s0
 
 service gatekeeper-1-0 /system/bin/android.hardware.gatekeeper@1.0-service
-    user root
-    group root
+    user system
+    group system
     disabled
     setenv LD_LIBRARY_PATH /system/lib64:/vendor/lib64:/vendor/lib64/hw
     interface android.hardware.gatekeeper@1.0::IGatekeeper default
